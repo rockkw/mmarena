@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMArena - Gym Club</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #4A90A4 0%, #3d7a8c 100%);
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            padding-bottom: 20px;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: transparent;
+        }
+
+        .back-button {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .currency-bar {
+            display: flex;
+            gap: 15px;
+        }
+
+        .currency-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            padding: 8px 15px;
+            border-radius: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .currency-icon {
+            font-size: 1.5em;
+        }
+
+        .currency-value {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .add-button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: white;
+            box-shadow: 0 3px 10px rgba(52, 152, 219, 0.4);
+            transition: all 0.3s;
+        }
+
+        /* Main Content */
+        .content-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 20px;
+        }
+
+        /* Left Panel - Gym Info */
+        .gym-panel {
+            background: linear-gradient(135deg, #7b3f8f, #6b2f7f);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .gym-header {
+            text-align: center;
+        }
+
+        .gym-name {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .gym-rank {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+
+        .rank-badge {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #f39c12;
+        }
+
+        .rank-tier {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1em;
+        }
+
+        .gym-logo {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3));
+            border-radius: 50%;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 6em;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .more-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            border: none;
+            border-radius: 15px;
+            padding: 12px 20px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.2em;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .gym-info-section {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .info-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .info-value {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .gym-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #f39c12;
+        }
+
+        .gym-league {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            padding: 20px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .gym-league:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4);
+        }
+
+        .league-icon {
+            font-size: 3em;
+        }
+
+        .league-info {
+            flex: 1;
+        }
+
+        .league-timer {
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .league-title {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        /* Right Panel - Members & Chat */
+        .members-panel {
+            background: linear-gradient(135deg, #7b3f8f, #6b2f7f);
+            border-radius: 20px;
+            padding: 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 800px;
+        }
+
+        .members-header {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .online-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .online-count {
+            color: #f39c12;
+        }
+
+        .header-tabs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-button {
+            padding: 10px 25px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-button.active {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .members-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Member Request Card */
+        .member-request {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.3), rgba(41, 128, 185, 0.3));
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .request-avatar {
+            width: 80px;
+            height: 100px;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            border-radius: 10px;
+            border: 3px solid white;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .request-level {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .request-progress {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .request-info {
+            flex: 1;
+        }
+
+        .request-status {
+            color: #f39c12;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .request-details {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .cards-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .cards-count {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .donate-button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .donate-button:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.3));
+        }
+
+        /* Chat Messages */
+        .chat-message {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.3), rgba(41, 128, 185, 0.3));
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .message-text {
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        /* Member Card */
+        .member-card {
+            background: linear-gradient(135deg, rgba(52, 73, 94, 0.5), rgba(44, 62, 80, 0.5));
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .member-avatar {
+            width: 70px;
+            height: 90px;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            border-radius: 10px;
+            border: 3px solid white;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+
+        .member-rank-badge {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            font-weight: bold;
+            border: 2px solid white;
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .member-stats {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .info-icon {
+            width: 35px;
+            height: 35px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .info-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Bottom Actions */
+        .bottom-actions {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .speed-up-button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+        }
+
+        .timer-display {
+            font-size: 1.1em;
+        }
+
+        .vs-icon {
+            font-size: 2em;
+        }
+
+        .create-game-button {
+            flex: 1;
+            padding: 15px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .create-game-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4);
+        }
+
+        .action-icon-button {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 1.8em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .action-icon-button:hover {
+            background: linear-gradient(135deg, #a9b8b9, #8d9a9b);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .content-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <button class="back-button" onclick="goBack()">←</button>
+        
+        <div class="currency-bar">
+            <div class="currency-item">
+                <span class="currency-icon">💰</span>
+                <span class="currency-value">6,992</span>
+                <button class="add-button">+</button>
+            </div>
+            <div class="currency-item">
+                <span class="currency-icon">💎</span>
+                <span class="currency-value">21</span>
+                <button class="add-button">+</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-container">
+        <!-- Left Panel - Gym Info -->
+        <div class="gym-panel">
+            <div class="gym-header">
+                <div class="gym-name">Elite Warriors</div>
+                <div class="gym-rank">
+                    <div>
+                        <span>🏆</span>
+                        <span class="rank-badge">74103</span>
+                    </div>
+                    <div class="rank-tier">
+                        <span>BRONZE II</span>
+                        <span>🥉</span>
+                        <span class="rank-badge">161</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="position: relative;">
+                <div class="gym-logo">🥊</div>
+                <button class="more-button">• • •</button>
+            </div>
+
+            <div class="gym-info-section">
+                <div class="info-row">
+                    <span class="info-label">Location</span>
+                    <span class="info-label">Type</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-value">All</span>
+                    <span class="info-value">Open</span>
+                </div>
+
+                <div class="gym-stats">
+                    <div class="stat-box">
+                        <div class="stat-label">Required Trophy</div>
+                        <div class="stat-value">🏆 800</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Donations/week</div>
+                        <div class="stat-value">161</div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px;">
+                    <div class="stat-label">Club tag</div>
+                    <div class="stat-value" style="color: #9b59b6;">#KK4VJ1R</div>
+                </div>
+            </div>
+
+            <div class="gym-league" onclick="alert('Opening Gym League...')">
+                <div class="league-icon">🚌</div>
+                <div class="league-info">
+                    <div class="league-timer">⏰ 01d 22h 36m</div>
+                    <div class="league-title">GYM LEAGUE</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Members & Chat -->
+        <div class="members-panel">
+            <div class="members-header">
+                <div class="online-status">
+                    <span>👥</span>
+                    <span>ONLINE</span>
+                    <span class="online-count">1/49</span>
+                </div>
+                <div class="header-tabs">
+                    <button class="tab-button" onclick="showMembers()">Members</button>
+                    <button class="tab-button active" onclick="showChat()">Chat</button>
+                </div>
+            </div>
+
+            <div class="members-content" id="membersContent">
+                <!-- Member Request -->
+                <div class="member-request">
+                    <div class="request-avatar">
+                        <div class="request-progress">0/2</div>
+                        <div class="request-level">Lv. 1</div>
+                        🥊
+                    </div>
+                    <div class="request-info">
+                        <div class="request-status">Requesting Cards!</div>
+                        <div class="request-details">
+                            <div class="cards-label">Cards received</div>
+                            <div class="cards-count">0/30</div>
+                        </div>
+                    </div>
+                    <button class="donate-button">Donate</button>
+                </div>
+
+                <!-- Chat Messages -->
+                <div class="chat-message">
+                    <div class="message-text">Fred joined the Club!</div>
+                </div>
+
+                <div class="chat-message">
+                    <div class="message-text">Fred has left the Club!</div>
+                </div>
+
+                <!-- Member Card -->
+                <div class="member-card">
+                    <div class="member-avatar">
+                        <div class="member-rank-badge">P</div>
+                        <div class="request-progress" style="position: absolute; bottom: 5px; left: 5px; font-size: 0.7em;">29/50</div>
+                        <div class="request-level" style="position: absolute; bottom: 5px; right: 5px; font-size: 0.7em;">Lv. 7</div>
+                        🥊
+                    </div>
+                    <div class="member-info">
+                        <div class="member-name">Player73122</div>
+                        <div class="request-status">Requesting Cards!</div>
+                        <div style="margin-top: 8px;">
+                            <div class="cards-label" style="font-size: 0.85em;">Cards received</div>
+                            <div class="cards-count" style="font-size: 1.1em;">0/4</div>
+                        </div>
+                    </div>
+                    <div class="info-icon">ℹ️</div>
+                </div>
+
+                <!-- Additional Members -->
+                <div class="member-card">
+                    <div class="member-avatar">
+                        <div class="member-rank-badge">M</div>
+                        🥊
+                    </div>
+                    <div class="member-info">
+                        <div class="member-name">Champion_Mike</div>
+                        <div class="member-stats">Level 12 • 2,450 🏆</div>
+                    </div>
+                    <div class="info-icon">ℹ️</div>
+                </div>
+
+                <div class="member-card">
+                    <div class="member-avatar">
+                        <div class="member-rank-badge">M</div>
+                        🥊
+                    </div>
+                    <div class="member-info">
+                        <div class="member-name">Sarah_Fighter</div>
+                        <div class="member-stats">Level 10 • 1,890 🏆</div>
+                    </div>
+                    <div class="info-icon">ℹ️</div>
+                </div>
+
+                <div class="member-card">
+                    <div class="member-avatar">
+                        <div class="member-rank-badge">M</div>
+                        🥊
+                    </div>
+                    <div class="member-info">
+                        <div class="member-name">Knockout_King</div>
+                        <div class="member-stats">Level 9 • 1,650 🏆</div>
+                    </div>
+                    <div class="info-icon">ℹ️</div>
+                </div>
+            </div>
+
+            <div class="bottom-actions">
+                <button class="speed-up-button">
+                    <span style="font-size: 1.5em;">💎</span>
+                    <span>39</span>
+                    <span>SPEED UP</span>
+                </button>
+                <div class="timer-display">
+                    <div style="font-size: 0.85em; opacity: 0.8;">⏰ 06h 26m 00s</div>
+                </div>
+                <div class="vs-icon">⚔️</div>
+                <button class="create-game-button">Create game</button>
+                <button class="action-icon-button">😊</button>
+                <button class="action-icon-button">💬</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.location.href = 'mmarena_home_screen.html';
+        }
+
+        function showMembers() {
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons[0].classList.add('active');
+            buttons[1].classList.remove('active');
+            // In production, this would filter to show only members
+        }
+
+        function showChat() {
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons[0].classList.remove('active');
+            buttons[1].classList.add('active');
+            // In production, this would show chat messages
+        }
+
+        // Update timer
+        let seconds = 23160; // 06h 26m 00s
+        setInterval(() => {
+            seconds--;
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            const timerDisplay = document.querySelector('.timer-display');
+            if (timerDisplay) {
+                timerDisplay.innerHTML = `<div style="font-size: 0.85em; opacity: 0.8;">⏰ ${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s</div>`;
+            }
+        }, 1000);
+
+        // Add click handlers
+        document.querySelectorAll('.donate-button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                alert('Opening donation interface...');
+            });
+        });
+
+        document.querySelectorAll('.info-icon').forEach(icon => {
+            icon.addEventListener('click', () => {
+                alert('Viewing member profile...');
+            });
+        });
+
+        document.querySelector('.create-game-button').addEventListener('click', () => {
+            alert('Creating new gym vs gym match...');
+        });
+    </script>
+</body>
+</html>

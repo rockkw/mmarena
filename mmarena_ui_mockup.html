@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMArena - AI-Native MMA Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e4e4e4;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #c92a2a 0%, #8b0000 100%);
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(201, 42, 42, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .gym-name {
+            font-size: 1.2em;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-icon {
+            font-size: 1.5em;
+        }
+
+        /* AI Coach Section */
+        .ai-coach-section {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-left: 5px solid #3498db;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .coach-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .coach-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+        }
+
+        .coach-info h3 {
+            font-size: 1.3em;
+            margin-bottom: 3px;
+        }
+
+        .coach-info p {
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+
+        .coach-message {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #3498db;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .chat-button {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chat-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        /* Main Content Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Fighters Section */
+        .fighters-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-header h2 {
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .toggle-btn {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn.active {
+            background: #c92a2a;
+            border-color: #c92a2a;
+        }
+
+        .fighters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .fighter-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            padding: 0;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fighter-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            object-position: center top;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+        }
+
+        .fighter-content {
+            padding: 15px;
+        }
+
+        .fighter-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #c92a2a, #e74c3c);
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .fighter-card:hover {
+            border-color: #c92a2a;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(201, 42, 42, 0.3);
+        }
+
+        .fighter-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .fighter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .fighter-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .fighter-nickname {
+            font-size: 0.9em;
+            color: #3498db;
+            font-style: italic;
+        }
+
+        .fighter-status {
+            display: flex;
+            gap: 5px;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-ready { background: #2ecc71; }
+        .status-training { background: #f39c12; }
+        .status-injured { background: #e74c3c; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .fighter-stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+
+        .fighter-record {
+            font-weight: bold;
+            color: #2ecc71;
+        }
+
+        .fighter-style {
+            opacity: 0.8;
+            font-size: 0.85em;
+            margin-bottom: 10px;
+        }
+
+        .fighter-attributes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            font-size: 0.85em;
+        }
+
+        .attribute {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .attribute-value {
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .upcoming-fights,
+        .quick-actions {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .upcoming-fights h3,
+        .quick-actions h3 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .fight-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #c92a2a;
+        }
+
+        .fight-date {
+            font-size: 0.85em;
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+
+        .fight-matchup {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .fight-details {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, #c92a2a, #8b0000);
+            border-color: #c92a2a;
+            transform: translateX(5px);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 2em;
+            cursor: pointer;
+            color: #e74c3c;
+            transition: transform 0.3s;
+        }
+
+        .modal-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .fighter-detail-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .fighter-detail-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            border: 5px solid #c92a2a;
+            display: block;
+            object-fit: cover;
+            box-shadow: 0 10px 30px rgba(201, 42, 42, 0.5);
+        }
+
+        .fighter-detail-name {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+
+        .fighter-detail-nickname {
+            font-size: 1.5em;
+            color: #3498db;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        .fighter-detail-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .detail-stat {
+            text-align: center;
+        }
+
+        .detail-stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2ecc71;
+        }
+
+        .detail-stat-label {
+            font-size: 0.9em;
+            opacity: 0.7;
+        }
+
+        .fighter-backstory {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .fighter-backstory h4 {
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+
+        .attributes-detailed {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .attribute-bar {
+            margin-bottom: 10px;
+        }
+
+        .attribute-bar-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .attribute-bar-fill {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .attribute-bar-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #c92a2a, #e74c3c);
+            border-radius: 10px;
+            transition: width 0.5s;
+        }
+
+        .fighter-interviews {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .interview-section {
+            margin-bottom: 20px;
+        }
+
+        .interview-section h5 {
+            color: #f39c12;
+            margin-bottom: 8px;
+        }
+
+        .interview-quote {
+            font-style: italic;
+            padding-left: 15px;
+            border-left: 3px solid #3498db;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+
+        .modal-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            padding: 12px;
+            background: linear-gradient(135deg, #c92a2a, #8b0000);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(201, 42, 42, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .fighters-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .fighters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .attributes-detailed {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🥊 MMArena</h1>
+            <div class="gym-name">Elite Warriors Training Camp</div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-icon">💰</span>
+                    <span><strong>$245,000</strong> Bank</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">⭐</span>
+                    <span><strong>92</strong> Reputation</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">🏆</span>
+                    <span><strong>3</strong> Champions</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">👥</span>
+                    <span><strong>20</strong> Fighters</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Coach Section -->
+        <div class="ai-coach-section">
+            <div class="coach-header">
+                <div class="coach-avatar">🤖</div>
+                <div class="coach-info">
+                    <h3>Coach Alex</h3>
+                    <p>Your AI Training Strategist</p>
+                </div>
+            </div>
+            <div class="coach-message">
+                <strong>Good evening, Boss!</strong> Jake Morrison has a title fight coming up in 3 days against Marcus Reed. We've been working on his striking defense all week. Maria Santos is ready for her next bout whenever you want to book it. Also, I noticed Dmitri Volkov's cardio has been slipping - might want to address that. What would you like to focus on today?
+            </div>
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" placeholder="Ask Coach Alex anything... (e.g., 'How's Jake's preparation going?')" id="chatInput">
+                <button class="chat-button" onclick="sendMessage()">
+                    <span id="sendButtonText">Send</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Fighters Section -->
+            <div class="fighters-section">
+                <div class="section-header">
+                    <h2>🥋 Active Roster</h2>
+                    <div class="view-toggle">
+                        <button class="toggle-btn active">Grid</button>
+                        <button class="toggle-btn">List</button>
+                    </div>
+                </div>
+                <div class="fighters-grid" id="fightersGrid">
+                    <!-- Fighters will be loaded here by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Upcoming Fights -->
+                <div class="upcoming-fights">
+                    <h3>📅 Upcoming Fights</h3>
+                    <div class="fight-item">
+                        <div class="fight-date">⏰ In 3 Days - Title Fight</div>
+                        <div class="fight-matchup">Jake Morrison vs Marcus Reed</div>
+                        <div class="fight-details">Welterweight Championship - Elite Fighting Championship</div>
+                    </div>
+                    <div class="fight-item">
+                        <div class="fight-date">⏰ Next Week</div>
+                        <div class="fight-matchup">Maria Santos vs TBD</div>
+                        <div class="fight-details">Strawweight Division - Looking for opponent</div>
+                    </div>
+                    <div class="fight-item">
+                        <div class="fight-date">⏰ In 2 Weeks</div>
+                        <div class="fight-matchup">Dmitri Volkov vs Carlos Mendoza</div>
+                        <div class="fight-details">Middleweight Bout - Regional Championship</div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h3>⚡ Quick Actions</h3>
+                    <button class="action-btn">🎯 Schedule Training Session</button>
+                    <button class="action-btn">🔍 Scout New Fighters</button>
+                    <button class="action-btn">🏗️ Upgrade Gym Facilities</button>
+                    <button class="action-btn">📊 View Analytics</button>
+                    <button class="action-btn">💬 Check Social Media</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fighter Detail Modal -->
+    <div class="modal" id="fighterModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div id="modalContent">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate fighter portrait URL using placeholder service
+        function getFighterImage(fighter) {
+            // Using a realistic AI avatar generator style
+            // In production, these would be actual AI-generated portraits
+            const seed = fighter.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            
+            // Determine gender for appropriate avatar
+            const femaleNames = ['Maria', 'Emily', 'Sarah', 'Aisha', 'Luna', 'Brianna', 'Talia'];
+            const isFemale = femaleNames.some(name => fighter.name.includes(name));
+            
+            // Using DiceBear API for realistic avatars (free, no API key needed)
+            // Styles: adventurer, avataaars, big-ears, big-smile, bottts, croodles, fun-emoji, icons, identicon, initials, lorelei, micah, miniavs, notionists, open-peeps, personas, pixel-art, shapes, thumbs
+            const style = 'adventurer'; // Realistic human-like avatars
+            
+            return `https://api.dicebear.com/7.x/${style}/svg?seed=${encodeURIComponent(fighter.name)}&backgroundColor=2c3e50&scale=100`;
+        }
+
+        // Fighter Data
+        const fighters = [
+            {
+                name: "Jake Morrison",
+                nickname: "The Hurricane",
+                age: 26,
+                weightClass: "Welterweight",
+                record: "12-3",
+                status: "ready",
+                style: "Wrestler / Ground & Pound",
+                stats: {
+                    wrestling: 92,
+                    boxing: 68,
+                    kickboxing: 58,
+                    bjj: 71,
+                    cardio: 88,
+                    chin: 79,
+                    power: 72,
+                    fightIQ: 76
+                },
+                backstory: "Former Division II wrestler from Iowa who turned to MMA after his Olympic dreams were derailed by a torn ACL. The injury taught him patience, but also left him with a deep fear of being sidelined again.",
+                personality: "Resilient, perfectionist, quietly confident",
+                interviews: {
+                    victory: "I just stuck to the game plan. My coaches saw something I could exploit and we worked it all week. That's what separates good camps from great camps - preparation.",
+                    loss: "No excuses. He was the better fighter tonight. I'll go back, watch the tape, and fix the holes. That's all you can do - learn and come back better.",
+                    trashTalk: "I'm not here to talk. I'm here to fight. You want to know who I am? Watch me on fight night."
+                }
+            },
+            {
+                name: "Maria Santos",
+                nickname: "Lightning",
+                age: 24,
+                weightClass: "Strawweight",
+                record: "8-1",
+                status: "ready",
+                style: "Muay Thai Striker / Technical Counter-Fighter",
+                stats: {
+                    kickboxing: 94,
+                    boxing: 87,
+                    wrestling: 43,
+                    bjj: 52,
+                    cardio: 91,
+                    chin: 82,
+                    power: 78,
+                    fightIQ: 89
+                },
+                backstory: "Born in São Paulo, Brazil. Became a national Muay Thai champion at 19. Every fight represents someone who doubted her. Fights with a chip on her shoulder.",
+                personality: "Fierce, proud, emotional",
+                interviews: {
+                    victory: "Did you see that? THAT is what happens when you doubt me. I told everyone I was going to put her lights out. Who's next?",
+                    loss: "She didn't beat me - I beat myself. This fire inside me? It just got hotter. That rematch is coming.",
+                    trashTalk: "Everyone talks about my wrestling like it's some huge problem. Come try to take me down. I've knocked out three 'wrestlers' this year."
+                }
+            },
+            {
+                name: "Tom Davidson",
+                nickname: "The Hammer",
+                age: 29,
+                weightClass: "Lightweight",
+                record: "5-2",
+                status: "training",
+                style: "Wrestler / Grinder",
+                stats: {
+                    wrestling: 84,
+                    boxing: 64,
+                    kickboxing: 48,
+                    bjj: 69,
+                    cardio: 81,
+                    chin: 91,
+                    power: 79,
+                    fightIQ: 62
+                },
+                backstory: "Small-town kid from Montana who used wrestling to escape a troubled home life. Found MMA through a friend and discovered he could make money doing the only thing he was good at.",
+                personality: "Blue-collar, humble, self-doubting",
+                interviews: {
+                    victory: "Yeah, thanks. I just tried to stay busy and out-work him. There's a lot of guys better than me, but nobody's going to out-work me.",
+                    loss: "I don't know, man. Maybe I'm just not good enough for this level. I'll keep training, but... yeah.",
+                    trashTalk: "Champion? Man, I'm just trying to win my next fight. I'll just keep showing up and working hard."
+                }
+            },
+            {
+                name: "Marcus Reed",
+                nickname: "The Mauler",
+                age: 25,
+                weightClass: "Welterweight",
+                record: "13-2",
+                status: "ready",
+                style: "Athletic Striker / Kickboxer",
+                stats: {
+                    kickboxing: 88,
+                    boxing: 82,
+                    wrestling: 71,
+                    bjj: 58,
+                    cardio: 77,
+                    chin: 73,
+                    power: 86,
+                    fightIQ: 74
+                },
+                backstory: "Former college basketball player who discovered MMA through friends. Athletic freak with championship potential but questionable heart when adversity hits.",
+                personality: "Confident, charismatic, front-runner",
+                interviews: {
+                    victory: "That's what I do! Did you see that knee? I'm ready for the title shot - I'm the most exciting fighter in this division.",
+                    loss: "Look, I got caught. It happens. He threw a lucky shot. I was winning that fight until I wasn't.",
+                    trashTalk: "Heart? Who's questioning my heart? I've been in wars! That's disrespectful. I know I'm one of the best in the world."
+                }
+            },
+            {
+                name: "Dmitri Volkov",
+                nickname: "The Siberian Express",
+                age: 31,
+                weightClass: "Middleweight",
+                record: "15-4",
+                status: "ready",
+                style: "Sambo / Combat Grappler",
+                stats: {
+                    wrestling: 89,
+                    sambo: 92,
+                    boxing: 71,
+                    kickboxing: 63,
+                    bjj: 81,
+                    cardio: 79,
+                    chin: 88,
+                    power: 84,
+                    fightIQ: 87
+                },
+                backstory: "Grew up in Novosibirsk, Siberia, in extreme poverty. Started Sambo to stay warm. Works construction during the day, trains at night. Sends money back to family in Russia.",
+                personality: "Stoic, pragmatic, tough",
+                interviews: {
+                    victory: "Is good fight. I do my job. Next fight, I ready. Thank you to my family in Russia watching.",
+                    loss: "He was better tonight. I must train harder. This is life. You work, sometimes fail. I will work harder.",
+                    trashTalk: "In Siberia, we learn to survive. In cage, same thing. I take you down, I control, I finish. Simple."
+                }
+            },
+            {
+                name: "Jamal Washington",
+                nickname: "The Prodigy",
+                age: 22,
+                weightClass: "Middleweight",
+                record: "9-2",
+                status: "training",
+                style: "Creative Striker / Unorthodox",
+                stats: {
+                    kickboxing: 91,
+                    boxing: 85,
+                    wrestling: 67,
+                    bjj: 72,
+                    cardio: 68,
+                    chin: 76,
+                    power: 81,
+                    fightIQ: 93
+                },
+                backstory: "Started training at 16 after watching Anderson Silva. Natural talent but immature - prone to partying and missing weight. Team constantly manages his personal life.",
+                personality: "Supremely talented, immature, conflicted",
+                interviews: {
+                    victory: "Y'all see that spinning kick?! That was NASTY! I'm special. Nobody moves like me, nobody thinks like me!",
+                    loss: "Yeah, I messed up. My bad. Weight cut got away from me. I'll get it together next time. I promise.",
+                    trashTalk: "Man, everyone wants to criticize. I'm 22! I'm learning, growing. I'm going to be champion one day, watch."
+                }
+            },
+            {
+                name: "Emily Chen",
+                nickname: "The Assassin",
+                age: 27,
+                weightClass: "Flyweight",
+                record: "11-2",
+                status: "ready",
+                style: "Technical Striker / Strategist",
+                stats: {
+                    kickboxing: 87,
+                    boxing: 89,
+                    wrestling: 76,
+                    bjj: 84,
+                    cardio: 92,
+                    chin: 81,
+                    power: 69,
+                    fightIQ: 96
+                },
+                backstory: "Stanford graduate with bioengineering degree who chose fighting over a six-figure job. Treats fighting like a science experiment with technical precision.",
+                personality: "Analytical, composed, perfectionistic",
+                interviews: {
+                    victory: "We identified three key weaknesses during fight camp and built a strategy to exploit them. The plan worked.",
+                    loss: "She executed her game plan better than I executed mine. I'll need to review the footage and recalibrate.",
+                    trashTalk: "People act like I gave up some great career. I made a calculated decision. The data supported the choice."
+                }
+            },
+            {
+                name: "Bobby Martinez",
+                nickname: "Boom Boom",
+                age: 28,
+                weightClass: "Lightweight",
+                record: "10-5",
+                status: "ready",
+                style: "Brawler / Street Fighter",
+                stats: {
+                    boxing: 81,
+                    kickboxing: 74,
+                    wrestling: 56,
+                    bjj: 48,
+                    cardio: 71,
+                    chin: 94,
+                    power: 92,
+                    fightIQ: 58
+                },
+                backstory: "Party animal from Miami who treats fighting like a hobby. Has real potential but refuses to take it seriously. Somehow keeps winning despite partying before fights.",
+                personality: "Carefree, charismatic, self-destructive",
+                interviews: {
+                    victory: "WOOO! Did you see that?! That was for Miami, baby! Who wants to fight me? Let's goooo!",
+                    loss: "Hey man, he got me. We'll run it back if he wants. Gonna grab a beer and shake it off.",
+                    trashTalk: "Training camp? Man, I just show up and scrap. This is supposed to be fun!"
+                }
+            },
+            {
+                name: "Sarah Williams",
+                nickname: "The Spartan",
+                age: 30,
+                weightClass: "Featherweight",
+                record: "14-3",
+                status: "ready",
+                style: "Tactical Brawler / Pressure Fighter",
+                stats: {
+                    boxing: 85,
+                    kickboxing: 79,
+                    wrestling: 81,
+                    bjj: 77,
+                    cardio: 94,
+                    chin: 87,
+                    power: 83,
+                    fightIQ: 91
+                },
+                backstory: "Former Army Ranger who saw combat in Afghanistan. Struggles with PTSD but finds fighting therapeutic. Fights with military precision and tactical thinking.",
+                personality: "Warrior, haunted, purposeful",
+                interviews: {
+                    victory: "Mission accomplished. This victory is for my brothers and sisters who served - you know who you are.",
+                    loss: "The enemy was better prepared tonight. You regroup, analyze failures, and come back stronger.",
+                    trashTalk: "The Army taught me that pain is temporary. Every fight is easy compared to combat."
+                }
+            },
+            {
+                name: "Carlos Mendoza",
+                nickname: "The Surgeon",
+                age: 26,
+                weightClass: "Featherweight",
+                record: "12-1",
+                status: "training",
+                style: "Technical Boxer / Counter-Puncher",
+                stats: {
+                    boxing: 93,
+                    kickboxing: 78,
+                    wrestling: 69,
+                    bjj: 74,
+                    cardio: 88,
+                    chin: 79,
+                    power: 86,
+                    fightIQ: 92
+                },
+                backstory: "From East LA, lost his father to gang violence at 12. Runs youth program in his neighborhood. Every fight purse goes partially to his gym.",
+                personality: "Purposeful, burdened, inspiring",
+                interviews: {
+                    victory: "This one's for the kids at Mendoza's Boxing Club. For every kid thinking there's no way out - there is.",
+                    loss: "I let people down tonight. But we don't quit where I'm from. The kids need to see how to handle adversity.",
+                    trashTalk: "Pressure? The pressure is watching your father die in the street. Everything else is just fighting."
+                }
+            },
+            {
+                name: "Viktor Andersson",
+                nickname: "The Viking",
+                age: 37,
+                weightClass: "Light Heavyweight",
+                record: "18-8",
+                status: "ready",
+                style: "Brawler / Old School",
+                stats: {
+                    boxing: 79,
+                    kickboxing: 72,
+                    wrestling: 74,
+                    bjj: 61,
+                    cardio: 68,
+                    chin: 89,
+                    power: 91,
+                    fightIQ: 66
+                },
+                backstory: "Swedish MMA pioneer who built his own gym with bare hands. Believes modern fighters are soft. Refuses to learn new techniques.",
+                personality: "Traditionalist, stubborn, proud",
+                interviews: {
+                    victory: "This is real fighting. Not this dance and hug on ground. Best man wins.",
+                    loss: "He ran from me whole fight. Judges reward this point-fighting style now. Sport has changed.",
+                    trashTalk: "I see fighters studying video all day, counting calories. In my day, we just fought. We were tougher."
+                }
+            },
+            {
+                name: "Aisha Al-Rashid",
+                nickname: "The Desert Rose",
+                age: 25,
+                weightClass: "Bantamweight",
+                record: "8-0",
+                status: "ready",
+                style: "Technical Striker / Outfighter",
+                stats: {
+                    kickboxing: 86,
+                    boxing: 83,
+                    wrestling: 72,
+                    bjj: 76,
+                    cardio: 91,
+                    chin: 78,
+                    power: 71,
+                    fightIQ: 88
+                },
+                backstory: "First Emirati woman to compete in professional MMA. Family initially disowned her. Now fights to prove women from Middle East can compete.",
+                personality: "Courageous, pioneering, diplomatic",
+                interviews: {
+                    victory: "Every woman watching in the Middle East who dreams of competing - this is for you. Change is possible.",
+                    loss: "Loss does not diminish what we are trying to accomplish. We have already won by showing what is possible.",
+                    trashTalk: "Fear is natural. Courage is moving forward despite fear. I will not be intimidated into silence."
+                }
+            },
+            {
+                name: "Jack Henderson",
+                nickname: "Cowboy",
+                age: 32,
+                weightClass: "Welterweight",
+                record: "14-6",
+                status: "training",
+                style: "Brawler / Tough Guy",
+                stats: {
+                    boxing: 80,
+                    kickboxing: 75,
+                    wrestling: 77,
+                    bjj: 68,
+                    cardio: 84,
+                    chin: 92,
+                    power: 78,
+                    fightIQ: 72
+                },
+                backstory: "Actual cowboy from Wyoming who grew up on a ranch. Treats fighting like bull riding - just another dangerous job. Just wants to fight and go back to ranch.",
+                personality: "Authentic, unbothered, simple",
+                interviews: {
+                    victory: "Yeah, that was a good scrap. I gotta get home though - got cattle to feed tomorrow morning.",
+                    loss: "He got me. Fair and square. I'll fight anyone y'all put in front of me.",
+                    trashTalk: "Title? I mean, sure, if they offer it. I just wanna compete against tough folks."
+                }
+            },
+            {
+                name: "Rashad Johnson",
+                nickname: "The Mathematician",
+                age: 28,
+                weightClass: "Middleweight",
+                record: "10-3",
+                status: "ready",
+                style: "Cerebral Technician / Unorthodox",
+                stats: {
+                    kickboxing: 84,
+                    boxing: 82,
+                    wrestling: 78,
+                    bjj: 88,
+                    cardio: 87,
+                    chin: 76,
+                    power: 68,
+                    fightIQ: 98
+                },
+                backstory: "PhD student in mathematics who fights to fund research. Has published papers on optimal fighting strategies. Studies fight patterns through statistical models.",
+                personality: "Analytical, awkward, brilliant",
+                interviews: {
+                    victory: "The probability matrix predicted this outcome with 73% confidence. Fascinating data for my research.",
+                    loss: "My model didn't account for his adjustment. I'll need to recalibrate the variables. Excellent information.",
+                    trashTalk: "I don't understand the purpose of pre-fight verbal exchanges. They don't affect the outcome."
+                }
+            },
+            {
+                name: "Luna Reyes",
+                nickname: "The Huntress",
+                age: 29,
+                weightClass: "Flyweight",
+                record: "11-2",
+                status: "ready",
+                style: "Patient Striker / Predator",
+                stats: {
+                    kickboxing: 88,
+                    boxing: 85,
+                    wrestling: 73,
+                    bjj: 80,
+                    cardio: 93,
+                    chin: 82,
+                    power: 79,
+                    fightIQ: 94
+                },
+                backstory: "Grew up in Alaska, daughter of survival expert. Views fighting as another form of hunting. Uncomfortable in cities, happiest in wilderness.",
+                personality: "Patient, isolated, observant",
+                interviews: {
+                    victory: "She showed me her patterns. I waited. When she committed, I took my shot. Just like hunting.",
+                    loss: "She was the better hunter tonight. She was more patient than me. I respect that.",
+                    trashTalk: "I train in the woods. Nature provides everything. Your gym has machines. Mine has mountains."
+                }
+            },
+            {
+                name: "Devon Price",
+                nickname: "Pretty Boy",
+                age: 24,
+                weightClass: "Welterweight",
+                record: "7-3",
+                status: "training",
+                style: "Aggressive Striker / Brawler",
+                stats: {
+                    kickboxing: 82,
+                    boxing: 86,
+                    wrestling: 68,
+                    bjj: 71,
+                    cardio: 84,
+                    chin: 71,
+                    power: 81,
+                    fightIQ: 64
+                },
+                backstory: "Former model who transitioned to fighting after being assaulted. Overcompensates by taking unnecessary damage. Insecure about being taken seriously.",
+                personality: "Insecure, proving himself, marketable",
+                interviews: {
+                    victory: "Everyone wants to talk about my face. You know what? I proved I'm a fighter tonight. I ain't scared of getting hit.",
+                    loss: "I got caught. But did you see me back down? Never. Maybe I should've been smarter, but I'm here to fight.",
+                    trashTalk: "That was a job. This is who I am. You wanna find out if I'm soft? Step in the cage with me."
+                }
+            },
+            {
+                name: "Kenji Tanaka",
+                nickname: "The Silent Samurai",
+                age: 31,
+                weightClass: "Lightweight",
+                record: "13-2",
+                status: "ready",
+                style: "Karate / Traditional Striker",
+                stats: {
+                    karate: 94,
+                    kickboxing: 87,
+                    boxing: 81,
+                    wrestling: 75,
+                    bjj: 79,
+                    cardio: 90,
+                    chin: 85,
+                    power: 76,
+                    fightIQ: 91
+                },
+                backstory: "Third-generation Japanese-American who found identity through martial arts. Fighting is spiritual practice. Works as graphic designer, trains obsessively.",
+                personality: "Silent, disciplined, spiritual",
+                interviews: {
+                    victory: "Osu. [Bows and walks away]",
+                    loss: "Osu. He was better. I must train harder. [Bows and walks away]",
+                    trashTalk: "Actions speak. Words are unnecessary. Respect to opponent. Respect to sport."
+                }
+            },
+            {
+                name: "Brianna O'Malley",
+                nickname: "The Beast",
+                age: 26,
+                weightClass: "Featherweight",
+                record: "10-1",
+                status: "ready",
+                style: "Aggressive Grappler / Mauler",
+                stats: {
+                    boxing: 83,
+                    kickboxing: 76,
+                    wrestling: 88,
+                    bjj: 80,
+                    cardio: 87,
+                    chin: 91,
+                    power: 86,
+                    fightIQ: 78
+                },
+                backstory: "Former college rugby player. Irish fighting family. Has something to prove to her brothers who doubted women could compete at their level.",
+                personality: "Warrior, intense, competitive",
+                interviews: {
+                    victory: "THAT'S O'Malley blood! My brothers said women couldn't fight like men - well, I just proved them wrong!",
+                    loss: "She got me. But I promise - that won't happen again. O'Malleys don't quit.",
+                    trashTalk: "I fight like I was raised - full speed, all heart, no quit. No running, no dancing. You fight."
+                }
+            },
+            {
+                name: "Andre Washington",
+                nickname: "Dr. Pain",
+                age: 34,
+                weightClass: "Middleweight",
+                record: "12-4",
+                status: "ready",
+                style: "Technical Grappler / Positional",
+                stats: {
+                    boxing: 77,
+                    kickboxing: 72,
+                    wrestling: 85,
+                    bjj: 89,
+                    cardio: 80,
+                    chin: 81,
+                    power: 70,
+                    fightIQ: 93
+                },
+                backstory: "Licensed dentist who fights on weekends. Lives double life - fixes teeth Monday-Friday, breaks faces on Saturdays. Keeps worlds completely separate.",
+                personality: "Compartmentalized, professional, unusual",
+                interviews: {
+                    victory: "Another successful procedure. Now if you'll excuse me, I have early appointments tomorrow.",
+                    loss: "Sometimes the procedure doesn't go as planned. You learn and improve your technique.",
+                    trashTalk: "Everyone assumes you can only be one thing. I reject that premise. I'm a professional who happens to fight."
+                }
+            },
+            {
+                name: "Talia Rossi",
+                nickname: "The Phoenix",
+                age: 28,
+                weightClass: "Bantamweight",
+                record: "9-2",
+                status: "training",
+                style: "Defensive Counter-Fighter / Survivor",
+                stats: {
+                    boxing: 84,
+                    kickboxing: 80,
+                    wrestling: 77,
+                    bjj: 82,
+                    cardio: 88,
+                    chin: 78,
+                    power: 74,
+                    fightIQ: 90
+                },
+                backstory: "Survived abusive relationship. Every fight is therapy - reclaiming her power. Fights for domestic violence survivors. Raw, emotional, incredibly brave.",
+                personality: "Survivor, emotional, purposeful",
+                interviews: {
+                    victory: "This one's for every woman who's been told she's broken. You're not broken - you're a phoenix.",
+                    loss: "I'm okay. Losing a fight doesn't compare to what I survived. This sport has given me my life back.",
+                    trashTalk: "I talk about it because silence protects abusers. If my story helps one person survive - everything has meaning."
+                }
+            }
+        ];
+
+        // Load fighters into grid
+        function loadFighters() {
+            const grid = document.getElementById('fightersGrid');
+            grid.innerHTML = '';
+            
+            fighters.forEach((fighter, index) => {
+                const card = document.createElement('div');
+                card.className = 'fighter-card';
+                card.onclick = () => openFighterModal(index);
+                
+                const statusClass = `status-${fighter.status}`;
+                
+                card.innerHTML = `
+                    <img src="${getFighterImage(fighter)}" alt="${fighter.name}" class="fighter-image">
+                    <div class="fighter-content">
+                        <div class="fighter-header">
+                            <div>
+                                <div class="fighter-name">${fighter.name}</div>
+                                <div class="fighter-nickname">"${fighter.nickname}"</div>
+                            </div>
+                            <div class="fighter-status">
+                                <div class="status-indicator ${statusClass}"></div>
+                            </div>
+                        </div>
+                        <div class="fighter-stats">
+                            <span class="fighter-record">${fighter.record}</span>
+                            <span>${fighter.weightClass}</span>
+                        </div>
+                        <div class="fighter-style">${fighter.style}</div>
+                        <div class="fighter-attributes">
+                            <div class="attribute">
+                                <span>Striking:</span>
+                                <span class="attribute-value">${Math.max(fighter.stats.boxing, fighter.stats.kickboxing)}</span>
+                            </div>
+                            <div class="attribute">
+                                <span>Grappling:</span>
+                                <span class="attribute-value">${Math.max(fighter.stats.wrestling, fighter.stats.bjj)}</span>
+                            </div>
+                            <div class="attribute">
+                                <span>Cardio:</span>
+                                <span class="attribute-value">${fighter.stats.cardio}</span>
+                            </div>
+                            <div class="attribute">
+                                <span>IQ:</span>
+                                <span class="attribute-value">${fighter.stats.fightIQ}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // Open fighter detail modal
+        function openFighterModal(index) {
+            const fighter = fighters[index];
+            const modal = document.getElementById('fighterModal');
+            const content = document.getElementById('modalContent');
+            
+            // Create detailed stats
+            let attributeBars = '';
+            for (const [key, value] of Object.entries(fighter.stats)) {
+                const displayKey = key.charAt(0).toUpperCase() + key.slice(1);
+                attributeBars += `
+                    <div class="attribute-bar">
+                        <div class="attribute-bar-label">
+                            <span>${displayKey}</span>
+                            <span>${value}/100</span>
+                        </div>
+                        <div class="attribute-bar-fill">
+                            <div class="attribute-bar-progress" style="width: ${value}%"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            content.innerHTML = `
+                <div class="fighter-detail-header">
+                    <img src="${getFighterImage(fighter)}" alt="${fighter.name}" class="fighter-detail-image">
+                    <div class="fighter-detail-name">${fighter.name}</div>
+                    <div class="fighter-detail-nickname">"${fighter.nickname}"</div>
+                    <div class="fighter-detail-stats">
+                        <div class="detail-stat">
+                            <div class="detail-stat-value">${fighter.record}</div>
+                            <div class="detail-stat-label">Record</div>
+                        </div>
+                        <div class="detail-stat">
+                            <div class="detail-stat-value">${fighter.age}</div>
+                            <div class="detail-stat-label">Age</div>
+                        </div>
+                        <div class="detail-stat">
+                            <div class="detail-stat-value">${fighter.weightClass}</div>
+                            <div class="detail-stat-label">Weight Class</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="fighter-backstory">
+                    <h4>📖 Background</h4>
+                    <p>${fighter.backstory}</p>
+                    <p style="margin-top: 10px;"><strong>Personality:</strong> ${fighter.personality}</p>
+                </div>
+                
+                <div class="fighter-backstory">
+                    <h4>🥊 Fighting Style</h4>
+                    <p>${fighter.style}</p>
+                </div>
+                
+                <h4 style="margin-bottom: 15px;">📊 Attributes</h4>
+                <div class="attributes-detailed">
+                    ${attributeBars}
+                </div>
+                
+                <div class="fighter-interviews">
+                    <h4 style="margin-bottom: 15px;">🎤 Interview Responses</h4>
+                    
+                    <div class="interview-section">
+                        <h5>After Victory:</h5>
+                        <div class="interview-quote">"${fighter.interviews.victory}"</div>
+                    </div>
+                    
+                    <div class="interview-section">
+                        <h5>After Loss:</h5>
+                        <div class="interview-quote">"${fighter.interviews.loss}"</div>
+                    </div>
+                    
+                    <div class="interview-section">
+                        <h5>On Trash Talk:</h5>
+                        <div class="interview-quote">"${fighter.interviews.trashTalk}"</div>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="modal-btn" onclick="alert('Training session started for ${fighter.name}!')">
+                        💪 Train Fighter
+                    </button>
+                    <button class="modal-btn" onclick="alert('Looking for opponents for ${fighter.name}...')">
+                        🥊 Book Fight
+                    </button>
+                    <button class="modal-btn" onclick="alert('Opening fight strategy planner...')">
+                        🎯 Plan Strategy
+                    </button>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('fighterModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('fighterModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // AI Chat simulation
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            const button = document.getElementById('sendButtonText');
+            button.innerHTML = '<span class="loading"></span>';
+            
+            // Simulate AI response
+            setTimeout(() => {
+                const coachMessage = document.querySelector('.coach-message');
+                
+                // Simple response logic based on keywords
+                let response = '';
+                if (message.toLowerCase().includes('jake')) {
+                    response = "Jake Morrison is in excellent shape for his title fight. His striking defense has improved significantly - we've been drilling head movement and footwork. He's confident but focused. I'd say he's got about a 65% chance against Marcus if he sticks to the wrestling game plan.";
+                } else if (message.toLowerCase().includes('maria')) {
+                    response = "Maria Santos is ready to fight anyone right now. Her striking is at an all-time high. The only concern is still her takedown defense - she's improved to about 60%, but against elite wrestlers, it could be an issue. Want me to book her a fight this week?";
+                } else if (message.toLowerCase().includes('train')) {
+                    response = "We have 12 training points available today. I recommend focusing on Jake's striking defense (3 points), Maria's wrestling defense (2 points), and general conditioning for the rest of the roster. What's your priority?";
+                } else if (message.toLowerCase().includes('scout')) {
+                    response = "I've been watching the regional circuit. Found three interesting prospects: a 22-year-old wrestler from Iowa (4-0), a Brazilian kickboxer (6-1), and a judo specialist from Japan (5-0). Want detailed breakdowns on any of them?";
+                } else {
+                    response = "Interesting question! Right now, we've got 20 fighters in our stable - that's a lot to manage. Our top priorities are: 1) Jake's title fight in 3 days, 2) Finding Maria a ranked opponent, and 3) Getting Jamal back on track after his last loss. What would you like to focus on?";
+                }
+                
+                coachMessage.innerHTML = `<strong>Coach Alex:</strong> ${response}`;
+                button.textContent = 'Send';
+                input.value = '';
+            }, 1500);
+        }
+
+        // Allow Enter key to send message
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Initialize
+        loadFighters();
+    </script>
+</body>
+</html>

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMArena - Fight Match</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1e 100%);
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Background Arena */
+        .arena-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect width="1200" height="800" fill="%231a1a2e"/><ellipse cx="600" cy="400" rx="300" ry="200" fill="%23c92a2a" opacity="0.2"/><circle cx="200" cy="600" r="100" fill="%23f39c12" opacity="0.1"/><circle cx="1000" cy="200" r="120" fill="%233498db" opacity="0.1"/></svg>');
+            background-size: cover;
+            filter: blur(3px);
+        }
+
+        .crowd-lights {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: radial-gradient(ellipse at top, rgba(255, 255, 255, 0.1), transparent);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Main Content */
+        .vs-container {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Fighter Sides */
+        .fighter-left,
+        .fighter-right {
+            position: absolute;
+            width: 45%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fighter-left {
+            left: 0;
+            background: linear-gradient(90deg, rgba(201, 42, 42, 0.3), transparent);
+        }
+
+        .fighter-right {
+            right: 0;
+            background: linear-gradient(270deg, rgba(52, 152, 219, 0.3), transparent);
+        }
+
+        .fighter-character {
+            position: relative;
+            width: 400px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .fighter-left .fighter-character {
+            animation-delay: 0s;
+        }
+
+        .fighter-right .fighter-character {
+            animation-delay: 1s;
+        }
+
+        .fighter-image {
+            width: 300px;
+            height: 400px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 20px;
+            border: 4px solid;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fighter-left .fighter-image {
+            border-color: #c92a2a;
+            box-shadow: 
+                0 20px 60px rgba(201, 42, 42, 0.6),
+                0 0 100px rgba(201, 42, 42, 0.3);
+        }
+
+        .fighter-right .fighter-image {
+            border-color: #3498db;
+            box-shadow: 
+                0 20px 60px rgba(52, 152, 219, 0.6),
+                0 0 100px rgba(52, 152, 219, 0.3);
+        }
+
+        .fighter-glow {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            right: -50%;
+            bottom: -50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        .fighter-info {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .fighter-name {
+            font-size: 2em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .fighter-nickname {
+            font-size: 1.2em;
+            color: #f39c12;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        .fighter-record {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2ecc71;
+        }
+
+        .fighter-stats {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .stat-badge {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 5px 12px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* VS Logo */
+        .vs-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        .vs-circle {
+            width: 250px;
+            height: 250px;
+            background: 
+                linear-gradient(135deg, #c92a2a 0%, #e74c3c 50%, #f39c12 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 
+                0 0 50px rgba(201, 42, 42, 0.8),
+                0 0 100px rgba(243, 156, 18, 0.4),
+                inset 0 -10px 30px rgba(0, 0, 0, 0.5);
+            border: 8px solid #000;
+            animation: rotate 20s linear infinite;
+            position: relative;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .vs-inner {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, #1a1a2e, #0f0f1e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 5px solid #000;
+        }
+
+        .vs-text {
+            font-size: 5em;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 
+                0 0 20px #c92a2a,
+                0 0 40px #e74c3c,
+                0 5px 10px rgba(0, 0, 0, 0.8);
+            animation: none;
+            letter-spacing: 5px;
+        }
+
+        /* Tagline */
+        .tagline {
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #c92a2a, #e74c3c, #f39c12);
+            padding: 15px 60px;
+            border-radius: 50px;
+            font-size: 1.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.5),
+                0 0 50px rgba(201, 42, 42, 0.4);
+            border: 4px solid #000;
+        }
+
+        /* Fight Button */
+        .fight-button {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 20px 80px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            border: none;
+            border-radius: 50px;
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            box-shadow: 
+                0 10px 40px rgba(46, 204, 113, 0.6),
+                inset 0 -5px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .fight-button:hover {
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 
+                0 15px 50px rgba(46, 204, 113, 0.8),
+                inset 0 -5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .fight-button:active {
+            transform: translateX(-50%) scale(0.98);
+        }
+
+        /* Back Button */
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .back-button:hover {
+            background: rgba(0, 0, 0, 0.8);
+            transform: scale(1.1);
+        }
+
+        /* Match Info */
+        .match-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 30px;
+            border-radius: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            text-align: center;
+            z-index: 100;
+        }
+
+        .match-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #f39c12;
+            margin-bottom: 10px;
+        }
+
+        .match-details {
+            font-size: 0.9em;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        /* Weight Class Badge */
+        .weight-class {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.5em;
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(155, 89, 182, 0.5);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            z-index: 100;
+        }
+
+        /* Stats Comparison */
+        .stats-comparison {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .stat-label {
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: #f39c12;
+        }
+
+        .stat-bar {
+            flex: 3;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .stat-fill-left {
+            position: absolute;
+            right: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, #c92a2a, #e74c3c);
+            border-radius: 10px 0 0 10px;
+        }
+
+        .stat-fill-right {
+            position: absolute;
+            left: 50%;
+            height: 100%;
+            background: linear-gradient(270deg, #3498db, #2980b9);
+            border-radius: 0 10px 10px 0;
+        }
+
+        .stat-values {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85em;
+            margin-top: 3px;
+        }
+
+        .stat-value-left {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .stat-value-right {
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        /* Sparks Effect */
+        .sparks {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            pointer-events: none;
+        }
+
+        .spark {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #f39c12;
+            border-radius: 50%;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+
+        .spark:nth-child(1) { top: 0; left: 50%; animation-delay: 0s; }
+        .spark:nth-child(2) { top: 25%; right: 0; animation-delay: 0.5s; }
+        .spark:nth-child(3) { bottom: 0; left: 50%; animation-delay: 1s; }
+        .spark:nth-child(4) { top: 25%; left: 0; animation-delay: 1.5s; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .fighter-image {
+                width: 250px;
+                height: 350px;
+                font-size: 6em;
+            }
+
+            .vs-circle {
+                width: 200px;
+                height: 200px;
+            }
+
+            .vs-inner {
+                width: 160px;
+                height: 160px;
+            }
+
+            .vs-text {
+                font-size: 4em;
+            }
+
+            .stats-comparison {
+                width: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="arena-background"></div>
+    <div class="crowd-lights"></div>
+
+    <button class="back-button" onclick="goBack()">←</button>
+
+    <div class="weight-class">WELTERWEIGHT DIVISION</div>
+
+    <div class="match-info">
+        <div class="match-title">⚡ RANKED MATCH</div>
+        <div class="match-details">
+            League 8<br>
+            Best of 3 Rounds<br>
+            Winner: +50 🏆
+        </div>
+    </div>
+
+    <div class="vs-container">
+        <!-- Left Fighter -->
+        <div class="fighter-left">
+            <div class="fighter-character">
+                <div class="fighter-image">
+                    <div class="fighter-glow"></div>
+                    🥊
+                </div>
+                <div class="fighter-info">
+                    <div class="fighter-name">Jake Morrison</div>
+                    <div class="fighter-nickname">"The Hurricane"</div>
+                    <div class="fighter-record">12-3-0</div>
+                    <div class="fighter-stats">
+                        <span class="stat-badge">🥋 Wrestler</span>
+                        <span class="stat-badge">Lv. 9</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Fighter -->
+        <div class="fighter-right">
+            <div class="fighter-character">
+                <div class="fighter-image">
+                    <div class="fighter-glow"></div>
+                    🥊
+                </div>
+                <div class="fighter-info">
+                    <div class="fighter-name">Marcus Reed</div>
+                    <div class="fighter-nickname">"The Mauler"</div>
+                    <div class="fighter-record">13-2-0</div>
+                    <div class="fighter-stats">
+                        <span class="stat-badge">🦵 Kickboxer</span>
+                        <span class="stat-badge">Lv. 10</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VS Logo -->
+        <div class="vs-logo">
+            <div class="vs-circle">
+                <div class="vs-inner">
+                    <div class="vs-text">VS</div>
+                </div>
+            </div>
+            <div class="sparks">
+                <div class="spark"></div>
+                <div class="spark"></div>
+                <div class="spark"></div>
+                <div class="spark"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Comparison -->
+    <div class="stats-comparison">
+        <div class="stat-row">
+            <div class="stat-label">STRIKING</div>
+        </div>
+        <div class="stat-bar">
+            <div class="stat-fill-left" style="width: 34%"></div>
+            <div class="stat-fill-right" style="width: 44%"></div>
+        </div>
+        <div class="stat-values">
+            <span class="stat-value-left">68</span>
+            <span class="stat-value-right">88</span>
+        </div>
+
+        <div class="stat-row">
+            <div class="stat-label">GRAPPLING</div>
+        </div>
+        <div class="stat-bar">
+            <div class="stat-fill-left" style="width: 46%"></div>
+            <div class="stat-fill-right" style="width: 35.5%"></div>
+        </div>
+        <div class="stat-values">
+            <span class="stat-value-left">92</span>
+            <span class="stat-value-right">71</span>
+        </div>
+
+        <div class="stat-row">
+            <div class="stat-label">CARDIO</div>
+        </div>
+        <div class="stat-bar">
+            <div class="stat-fill-left" style="width: 44%"></div>
+            <div class="stat-fill-right" style="width: 38.5%"></div>
+        </div>
+        <div class="stat-values">
+            <span class="stat-value-left">88</span>
+            <span class="stat-value-right">77</span>
+        </div>
+    </div>
+
+    <!-- Tagline -->
+    <div class="tagline">
+        ANYONE. ANYWHERE. ANYTIME.
+    </div>
+
+    <!-- Fight Button -->
+    <button class="fight-button" onclick="startFight()">
+        ⚡ START FIGHT
+    </button>
+
+    <script>
+        function goBack() {
+            window.location.href = 'mmarena_home_screen.html';
+        }
+
+        function startFight() {
+            // Add dramatic transition
+            const button = document.querySelector('.fight-button');
+            button.style.transform = 'translateX(-50%) scale(0.9)';
+            
+            setTimeout(() => {
+                window.location.href = 'mmarena_fight_round.html';
+            }, 200);
+        }
+
+        // Add some dynamic effects
+        setInterval(() => {
+            const leftGlow = document.querySelector('.fighter-left .fighter-glow');
+            const rightGlow = document.querySelector('.fighter-right .fighter-glow');
+            
+            leftGlow.style.opacity = Math.random() * 0.5 + 0.3;
+            rightGlow.style.opacity = Math.random() * 0.5 + 0.3;
+        }, 2000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMArena - Fighter Training</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1e 100%);
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Blurred Background */
+        .background-blur {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect width="1200" height="800" fill="%231a1a2e"/></svg>');
+            filter: blur(10px);
+        }
+
+        /* Top Bar (visible behind modal) */
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, rgba(20, 20, 40, 0.9), rgba(30, 30, 50, 0.9));
+            z-index: 1;
+        }
+
+        .level-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            padding: 8px 20px;
+            border-radius: 30px;
+        }
+
+        .level-number {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .xp-bar {
+            width: 200px;
+            height: 25px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f39c12, #e67e22);
+            width: 82.28%;
+        }
+
+        .xp-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .currency-bar {
+            display: flex;
+            gap: 15px;
+        }
+
+        .currency-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            padding: 8px 15px;
+            border-radius: 25px;
+        }
+
+        /* Modal Container */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .fighter-modal {
+            background: linear-gradient(135deg, #4a5f7f, #3d4f6b);
+            border-radius: 30px;
+            width: 100%;
+            max-width: 1100px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.8),
+                inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+
+        /* Modal Header */
+        .modal-header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid rgba(0, 0, 0, 0.3);
+        }
+
+        .fighter-title {
+            font-size: 2em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .close-button {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .close-button:hover {
+            background: rgba(231, 76, 60, 0.5);
+            transform: scale(1.1);
+        }
+
+        /* Modal Content */
+        .modal-content {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 30px;
+            padding: 30px;
+            max-height: calc(90vh - 100px);
+            overflow-y: auto;
+        }
+
+        /* Left Column - Fighter Card */
+        .fighter-card-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .fighter-card-large {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 4px solid #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .fighter-image-large {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12em;
+            position: relative;
+        }
+
+        .rarity-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .fighter-progress-large {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .fighter-level-large {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .fighter-xp-bar-large {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .fighter-xp-fill-large {
+            height: 100%;
+            background: linear-gradient(90deg, #f39c12, #e67e22);
+            width: 50%;
+        }
+
+        .level-up-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            background: linear-gradient(135deg, #8b6f47, #6b5736);
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .level-up-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .level-up-cost {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2em;
+        }
+
+        /* Right Column - Stats */
+        .fighter-stats-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .fighter-info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .fighter-info {
+            flex: 1;
+        }
+
+        .fighter-name-large {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .fighter-nickname-large {
+            font-size: 1.3em;
+            color: #f39c12;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        .fighter-description {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .fighter-meta {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .meta-item {
+            text-align: center;
+        }
+
+        .meta-label {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-bottom: 3px;
+        }
+
+        .meta-value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        /* Stats Display */
+        .stats-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stats-title {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .rarity-indicator {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            padding: 5px 15px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .category-label {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .stat-icon {
+            width: 30px;
+            font-size: 1.3em;
+        }
+
+        .stat-name {
+            flex: 1;
+            font-weight: bold;
+        }
+
+        .stat-bar-container {
+            flex: 2;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .stat-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            border-radius: 12px;
+            transition: width 0.5s;
+        }
+
+        .stat-value {
+            min-width: 100px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .stat-increase {
+            color: #2ecc71;
+            font-size: 1em;
+        }
+
+        /* Fighting Stats Section */
+        .fighting-stats {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .fighting-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .fighting-stat-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .fighting-stat-label {
+            font-size: 0.75em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+            color: #3498db;
+        }
+
+        .fighting-stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        /* Special Ability */
+        .special-ability {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .ability-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .ability-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .ability-info {
+            flex: 1;
+        }
+
+        .ability-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .ability-description {
+            font-size: 0.95em;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .modal-content {
+                grid-template-columns: 1fr;
+            }
+
+            .fighting-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-blur"></div>
+
+    <!-- Top Bar (visible behind modal) -->
+    <div class="top-bar">
+        <div class="level-display">
+            <div class="level-number">9</div>
+            <div class="xp-bar">
+                <div class="xp-fill"></div>
+                <div class="xp-text">8,228 / 10,000</div>
+            </div>
+        </div>
+        
+        <div class="currency-bar">
+            <div class="currency-item">
+                <span style="font-size: 1.5em;">💰</span>
+                <span style="font-weight: bold; font-size: 1.1em;">6,992</span>
+            </div>
+            <div class="currency-item">
+                <span style="font-size: 1.5em;">💎</span>
+                <span style="font-weight: bold; font-size: 1.1em;">21</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fighter Training Modal -->
+    <div class="modal-overlay">
+        <div class="fighter-modal">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <div class="fighter-title">Jake Morrison</div>
+                <button class="close-button" onclick="closeModal()">✕</button>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="modal-content">
+                <!-- Left Column - Fighter Card -->
+                <div class="fighter-card-section">
+                    <div class="fighter-card-large">
+                        <div class="fighter-image-large">
+                            <div class="rarity-badge">ELITE</div>
+                            <div class="fighter-progress-large">1/2</div>
+                            <div class="fighter-level-large">Lv. 9</div>
+                            🥊
+                        </div>
+                        <div class="fighter-xp-bar-large">
+                            <div class="fighter-xp-fill-large"></div>
+                        </div>
+                    </div>
+
+                    <button class="level-up-button" onclick="levelUp()">
+                        <div class="level-up-cost">
+                            <span>💰</span>
+                            <span>5,000</span>
+                        </div>
+                        <span>LEVEL UP</span>
+                    </button>
+                </div>
+
+                <!-- Right Column - Stats -->
+                <div class="fighter-stats-section">
+                    <!-- Fighter Info -->
+                    <div class="fighter-info-header">
+                        <div class="fighter-info">
+                            <div class="fighter-name-large">Jake Morrison</div>
+                            <div class="fighter-nickname-large">"The Hurricane"</div>
+                            
+                            <div class="fighter-description">
+                                Skilled at controlling opponents on the ground, especially wrestlers. Jake's father was a legendary wrestler who inspired him to start competing.
+                            </div>
+
+                            <div class="fighter-meta">
+                                <div class="meta-item">
+                                    <div class="meta-label">STANCE</div>
+                                    <div class="meta-value">Orthodox</div>
+                                </div>
+                                <div class="meta-item">
+                                    <div class="meta-label">REACH</div>
+                                    <div class="meta-value">73"</div>
+                                </div>
+                                <div class="meta-item">
+                                    <div class="meta-label">RECORD</div>
+                                    <div class="meta-value">12/3/0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Section -->
+                    <div>
+                        <div class="stats-header">
+                            <span style="font-size: 1.5em;">⚡</span>
+                            <div class="stats-title">Fighter Stats</div>
+                            <div class="rarity-indicator">LEGENDARY</div>
+                            <div class="category-label">Wrestler</div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-row">
+                                <div class="stat-icon">❓</div>
+                                <div class="stat-name">Contact</div>
+                                <div class="stat-bar-container">
+                                    <div class="stat-bar-fill" style="width: 92%"></div>
+                                </div>
+                                <div class="stat-value">
+                                    <span class="stat-increase">(+14)</span> 137
+                                </div>
+                            </div>
+
+                            <div class="stat-row">
+                                <div class="stat-icon">❓</div>
+                                <div class="stat-name">Power</div>
+                                <div class="stat-bar-container">
+                                    <div class="stat-bar-fill" style="width: 72%"></div>
+                                </div>
+                                <div class="stat-value">
+                                    <span class="stat-increase">(+15)</span> 143
+                                </div>
+                            </div>
+
+                            <div class="stat-row">
+                                <div class="stat-icon">❓</div>
+                                <div class="stat-name">Speed</div>
+                                <div class="stat-bar-container">
+                                    <div class="stat-bar-fill" style="width: 88%"></div>
+                                </div>
+                                <div class="stat-value">
+                                    <span class="stat-increase">(+12)</span> 122
+                                </div>
+                            </div>
+
+                            <div class="stat-row">
+                                <div class="stat-icon">❓</div>
+                                <div class="stat-name">Takedowns</div>
+                                <div class="stat-bar-container">
+                                    <div class="stat-bar-fill" style="width: 92%"></div>
+                                </div>
+                                <div class="stat-value">
+                                    <span class="stat-increase">(+11)</span> 109
+                                </div>
+                            </div>
+
+                            <div class="stat-row">
+                                <div class="stat-icon">❓</div>
+                                <div class="stat-name">Defense</div>
+                                <div class="stat-bar-container">
+                                    <div class="stat-bar-fill" style="width: 79%"></div>
+                                </div>
+                                <div class="stat-value">
+                                    <span class="stat-increase">(+12)</span> 120
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fighting Stats -->
+                    <div class="fighting-stats">
+                        <div class="stats-header">
+                            <span style="font-size: 1.5em;">🥊</span>
+                            <div class="stats-title">Wrestler Stats</div>
+                        </div>
+
+                        <div class="fighting-stats-grid">
+                            <div class="fighting-stat-box">
+                                <div class="fighting-stat-label">AVG</div>
+                                <div class="fighting-stat-value">0.111</div>
+                            </div>
+                            <div class="fighting-stat-box">
+                                <div class="fighting-stat-label">OBP</div>
+                                <div class="fighting-stat-value">0.111</div>
+                            </div>
+                            <div class="fighting-stat-box">
+                                <div class="fighting-stat-label">SLG</div>
+                                <div class="fighting-stat-value">0.111</div>
+                            </div>
+                            <div class="fighting-stat-box">
+                                <div class="fighting-stat-label">OPS</div>
+                                <div class="fighting-stat-value">0.222</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Special Ability -->
+                    <div class="special-ability">
+                        <div class="ability-header">
+                            <div class="ability-icon">🎯</div>
+                            <div class="ability-info">
+                                <div class="ability-name">Ground & Pound Master</div>
+                                <div class="ability-description">
+                                    When taking opponents to the ground, damage output increases by 50% and submission defense increases by 30%.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function closeModal() {
+            window.location.href = 'mmarena_team_page.html';
+        }
+
+        function levelUp() {
+            const cost = 5000;
+            const currentMoney = 6992;
+            
+            if (currentMoney >= cost) {
+                alert('🎉 Level Up Successful!\n\nJake Morrison is now Level 10!\n\nAll stats increased by +5');
+            } else {
+                alert('❌ Not enough coins!\n\nYou need 5,000 coins to level up.\nCurrent balance: 6,992 coins');
+            }
+        }
+
+        // Add some animation on load
+        window.addEventListener('load', () => {
+            const modal = document.querySelector('.fighter-modal');
+            modal.style.opacity = '0';
+            modal.style.transform = 'scale(0.9)';
+            
+            setTimeout(() => {
+                modal.style.transition = 'all 0.3s ease-out';
+                modal.style.opacity = '1';
+                modal.style.transform = 'scale(1)';
+            }, 100);
+        });
+    </script>
+</body>
+</html>

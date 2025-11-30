@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMArena - Fight Round 1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Arena Background */
+        .arena-scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect width="1200" height="800" fill="%231a1a2e"/><rect x="300" y="150" width="600" height="500" fill="%23333" opacity="0.5"/></svg>');
+            background-size: cover;
+        }
+
+        /* Crowd Background */
+        .crowd-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: 
+                linear-gradient(180deg, rgba(100, 50, 30, 0.6), rgba(50, 25, 15, 0.4)),
+                repeating-linear-gradient(90deg, 
+                    rgba(255, 200, 150, 0.1) 0px, 
+                    rgba(255, 200, 150, 0.1) 20px,
+                    rgba(200, 150, 100, 0.1) 20px,
+                    rgba(200, 150, 100, 0.1) 40px
+                );
+            filter: blur(2px);
+        }
+
+        /* Octagon Floor */
+        .octagon-floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
+            clip-path: polygon(20% 30%, 80% 30%, 100% 100%, 0% 100%);
+        }
+
+        .octagon-canvas {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 400px;
+            background: 
+                radial-gradient(circle, rgba(201, 42, 42, 0.3), transparent),
+                linear-gradient(135deg, #3a3a3a, #2a2a2a);
+            clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+            border: 3px solid #c92a2a;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Center Logo */
+        .octagon-center-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(201, 42, 42, 0.4), transparent);
+            border: 2px solid rgba(201, 42, 42, 0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            opacity: 0.6;
+        }
+
+        /* Fighters */
+        .fighter {
+            position: absolute;
+            bottom: 15%;
+            width: 200px;
+            height: 350px;
+            transition: all 0.3s;
+        }
+
+        .fighter-left {
+            left: 25%;
+            transform: translateX(-50%);
+        }
+
+        .fighter-right {
+            right: 25%;
+            transform: translateX(50%) scaleX(-1);
+        }
+
+        .fighter-body {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .fighter-character {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(50, 50, 70, 0.9), rgba(30, 30, 50, 0.9));
+            border-radius: 50px 50px 10px 10px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 30px;
+        }
+
+        .fighter-head {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #d4a574, #bc8f5f);
+            border-radius: 50%;
+            margin-bottom: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .fighter-torso {
+            width: 100px;
+            height: 120px;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            border-radius: 20px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .fighter-name-jersey {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+        }
+
+        .fighter-number {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2em;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .fighter-legs {
+            width: 60px;
+            height: 100px;
+            background: linear-gradient(180deg, #2c3e50, #1a252f);
+            border-radius: 10px;
+        }
+
+        /* Score Board */
+        .scoreboard {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .team-score {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.9), rgba(41, 128, 185, 0.9));
+            padding: 15px 25px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-width: 200px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .team-score.opponent {
+            background: linear-gradient(135deg, rgba(52, 73, 94, 0.9), rgba(44, 62, 80, 0.9));
+        }
+
+        .team-name {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .team-points {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        /* Round Info */
+        .round-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.9), rgba(142, 68, 173, 0.9));
+            padding: 15px 30px;
+            border-radius: 15px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+
+        .round-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .inning-indicator {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .inning-dot {
+            width: 12px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+        }
+
+        .inning-dot.active {
+            background: #f39c12;
+            box-shadow: 0 0 10px #f39c12;
+        }
+
+        /* Fighter Stats Overlay */
+        .fighter-stats-left,
+        .fighter-stats-right {
+            position: absolute;
+            bottom: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            min-width: 150px;
+        }
+
+        .fighter-stats-left {
+            left: 20px;
+        }
+
+        .fighter-stats-right {
+            right: 20px;
+        }
+
+        .stats-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .health-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            border-radius: 10px;
+            transition: width 0.5s;
+        }
+
+        .stamina-bar {
+            width: 100%;
+            height: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .stamina-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            border-radius: 8px;
+            transition: width 0.5s;
+        }
+
+        .stat-label {
+            font-size: 0.75em;
+            opacity: 0.8;
+            margin-bottom: 3px;
+        }
+
+        /* Action Message */
+        .action-message {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px 40px;
+            border-radius: 15px;
+            font-size: 1.3em;
+            font-weight: bold;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.7);
+            z-index: 50;
+        }
+
+        /* Ability Tooltip */
+        .ability-tooltip {
+            position: absolute;
+            top: 50%;
+            right: 80px;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, rgba(155, 89, 182, 0.95), rgba(142, 68, 173, 0.95));
+            padding: 15px 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            max-width: 300px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .ability-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+
+        .ability-description {
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        /* Emoji Chat */
+        .emoji-chat {
+            position: absolute;
+            bottom: 300px;
+            left: 80px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 50%;
+            font-size: 2em;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            animation: bounce 0.5s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Fight Effects */
+        .impact-effect {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5em;
+            animation: impact 0.5s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes impact {
+            0% { 
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            100% { 
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(2);
+            }
+        }
+
+        /* Action Buttons (hidden but functional) */
+        .action-controls {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 10;
+            opacity: 0;
+        }
+
+        .action-btn {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.8), rgba(192, 57, 43, 0.8));
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+
+        .action-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .fighter {
+                width: 150px;
+                height: 280px;
+            }
+
+            .octagon-canvas {
+                width: 500px;
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Arena Background -->
+    <div class="arena-scene">
+        <div class="crowd-area"></div>
+        <div class="octagon-floor"></div>
+        <div class="octagon-canvas">
+            <div class="octagon-center-logo">⚔️</div>
+        </div>
+    </div>
+
+    <!-- Scoreboard -->
+    <div class="scoreboard">
+        <div class="team-score">
+            <span class="team-name">Player73122</span>
+            <span class="team-points">1</span>
+        </div>
+        <div class="team-score opponent">
+            <span class="team-name">Trinity</span>
+            <span class="team-points">0</span>
+        </div>
+    </div>
+
+    <!-- Round Info -->
+    <div class="round-info">
+        <div class="round-number">Round 1</div>
+        <div class="inning-indicator">
+            <div class="inning-dot active"></div>
+            <div class="inning-dot"></div>
+            <div class="inning-dot"></div>
+        </div>
+    </div>
+
+    <!-- Left Fighter (Player) -->
+    <div class="fighter fighter-left" id="fighterLeft">
+        <div class="fighter-body">
+            <div class="fighter-character">
+                <div class="fighter-head"></div>
+                <div class="fighter-torso">
+                    <div class="fighter-name-jersey">JAKE</div>
+                    <div class="fighter-number">12</div>
+                </div>
+                <div class="fighter-legs"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Fighter (Opponent) -->
+    <div class="fighter fighter-right" id="fighterRight">
+        <div class="fighter-body">
+            <div class="fighter-character">
+                <div class="fighter-head"></div>
+                <div class="fighter-torso" style="background: linear-gradient(135deg, #c92a2a, #8b0000);">
+                    <div class="fighter-name-jersey">REED</div>
+                    <div class="fighter-number">25</div>
+                </div>
+                <div class="fighter-legs"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fighter Stats Left -->
+    <div class="fighter-stats-left">
+        <div class="stats-name">Jake Morrison</div>
+        <div class="stat-label">Health</div>
+        <div class="health-bar">
+            <div class="health-fill" id="healthLeft" style="width: 85%"></div>
+        </div>
+        <div class="stat-label">Stamina</div>
+        <div class="stamina-bar">
+            <div class="stamina-fill" id="staminaLeft" style="width: 70%"></div>
+        </div>
+    </div>
+
+    <!-- Fighter Stats Right -->
+    <div class="fighter-stats-right">
+        <div class="stats-name">Marcus Reed</div>
+        <div class="stat-label">Health</div>
+        <div class="health-bar">
+            <div class="health-fill" id="healthRight" style="width: 78%"></div>
+        </div>
+        <div class="stat-label">Stamina</div>
+        <div class="stamina-bar">
+            <div class="stamina-fill" id="staminaRight" style="width: 65%"></div>
+        </div>
+    </div>
+
+    <!-- Action Message -->
+    <div class="action-message" id="actionMessage">
+        Morrison lands a powerful jab!
+    </div>
+
+    <!-- Ability Tooltip -->
+    <div class="ability-tooltip">
+        <div class="ability-title">Ground & Pound Active!</div>
+        <div class="ability-description">
+            Damage increased by 50% when controlling opponent on the ground.
+        </div>
+    </div>
+
+    <!-- Emoji Chat -->
+    <div class="emoji-chat">😊</div>
+
+    <!-- Hidden Action Controls -->
+    <div class="action-controls">
+        <button class="action-btn" onclick="performAction('strike')">Strike</button>
+        <button class="action-btn" onclick="performAction('grapple')">Grapple</button>
+        <button class="action-btn" onclick="performAction('defend')">Defend</button>
+    </div>
+
+    <!-- Next Round Button -->
+    <button class="next-round-btn" id="nextRoundBtn" onclick="nextRound()" style="
+        position: absolute;
+        bottom: 40px;
+        right: 40px;
+        padding: 15px 40px;
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        border: none;
+        border-radius: 15px;
+        color: white;
+        font-weight: bold;
+        font-size: 1.2em;
+        cursor: pointer;
+        box-shadow: 0 5px 20px rgba(46, 204, 113, 0.5);
+        transition: all 0.3s;
+        z-index: 200;
+        display: none;
+    ">
+        NEXT ROUND →
+    </button>
+
+    <script>
+        const actions = [
+            "Morrison throws a jab!",
+            "Reed counters with a leg kick!",
+            "Morrison attempts a takedown!",
+            "Reed defends and strikes back!",
+            "Morrison lands a combination!",
+            "Reed clinches against the cage!",
+            "Morrison breaks free!",
+            "Reed throws a high kick!",
+            "Morrison ducks and counters!",
+            "Both fighters exchange strikes!"
+        ];
+
+        let actionIndex = 0;
+        let round = 1;
+
+        // Simulate fight action
+        function simulateFight() {
+            const messageEl = document.getElementById('actionMessage');
+            const leftFighter = document.getElementById('fighterLeft');
+            const rightFighter = document.getElementById('fighterRight');
+            const healthLeft = document.getElementById('healthLeft');
+            const healthRight = document.getElementById('healthRight');
+            const staminaLeft = document.getElementById('staminaLeft');
+            const staminaRight = document.getElementById('staminaRight');
+
+            setInterval(() => {
+                // Update action message
+                messageEl.textContent = actions[actionIndex % actions.length];
+                actionIndex++;
+
+                // Animate fighters
+                if (Math.random() > 0.5) {
+                    leftFighter.style.transform = 'translateX(-30px) scale(1.05)';
+                    setTimeout(() => {
+                        leftFighter.style.transform = 'translateX(0) scale(1)';
+                    }, 300);
+                    
+                    // Damage opponent
+                    const currentHealth = parseInt(healthRight.style.width);
+                    healthRight.style.width = Math.max(0, currentHealth - Math.random() * 8) + '%';
+                } else {
+                    rightFighter.style.transform = 'translateX(30px) scaleX(-1) scale(1.05)';
+                    setTimeout(() => {
+                        rightFighter.style.transform = 'translateX(0) scaleX(-1) scale(1)';
+                    }, 300);
+                    
+                    // Damage player
+                    const currentHealth = parseInt(healthLeft.style.width);
+                    healthLeft.style.width = Math.max(0, currentHealth - Math.random() * 8) + '%';
+                }
+
+                // Update stamina
+                const currentStaminaLeft = parseInt(staminaLeft.style.width);
+                const currentStaminaRight = parseInt(staminaRight.style.width);
+                staminaLeft.style.width = Math.max(20, currentStaminaLeft - Math.random() * 5) + '%';
+                staminaRight.style.width = Math.max(20, currentStaminaRight - Math.random() * 5) + '%';
+
+                // Show impact effect occasionally
+                if (Math.random() > 0.7) {
+                    showImpact();
+                }
+
+            }, 2500);
+        }
+
+        function showImpact() {
+            const impact = document.createElement('div');
+            impact.className = 'impact-effect';
+            impact.textContent = '💥';
+            document.body.appendChild(impact);
+            
+            setTimeout(() => {
+                impact.remove();
+            }, 500);
+        }
+
+        function performAction(action) {
+            console.log('Action:', action);
+            showImpact();
+        }
+
+        // Start fight simulation
+        setTimeout(() => {
+            simulateFight();
+            
+            // Show next round button after 20 seconds
+            setTimeout(() => {
+                document.getElementById('nextRoundBtn').style.display = 'block';
+            }, 20000);
+        }, 1000);
+
+        function nextRound() {
+            window.location.href = 'mmarena_fight_round2.html';
+        }
+
+        // Handle spacebar for actions
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                performAction('strike');
+            }
+        });
+
+        // Show controls on hover
+        const controls = document.querySelector('.action-controls');
+        document.addEventListener('mousemove', (e) => {
+            if (e.clientY > window.innerHeight / 2) {
+                controls.style.opacity = '0.7';
+            } else {
+                controls.style.opacity = '0';
+            }
+        });
+    </script>
+</body>
+</html>
