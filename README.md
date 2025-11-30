@@ -5,7 +5,7 @@
 
 ## Executive Summary
 
-MMArena is a next-generation web-based MMA management game that leverages AI to create dynamic, personalized experiences. Inspired by MMArmy's strategic depth, MMArena transforms the traditional browser-based management simulation into an intelligent, conversational, and adaptive gaming experience where AI powers everything from fighter development to fight commentary.
+MMArena is a next-generation web-based MMA management game that leverages AI to create dynamic, personalized experiences. MMArena transforms the traditional browser-based management simulation into an intelligent, conversational, and adaptive gaming experience where AI powers everything from fighter development to fight commentary.
 
 ---
 
@@ -22,7 +22,7 @@ MMArena is a next-generation web-based MMA management game that leverages AI to 
 ### 1.1 Core Concept
 Players manage an MMA training camp, recruiting and developing fighters through AI-assisted training, strategic fight planning, and progressive organizational competition. The AI acts as your assistant coach, analyst, storyteller, and opponent.
 
-### 1.2 Key Differentiators from MMArmy
+### 1.2 Key Differentiators from other games
 - **AI Training Coach**: Natural language training requests instead of clicking stat buttons
 - **Dynamic Fighter Personalities**: AI-generated backstories, interview responses, rivalries
 - **Intelligent Fight Commentary**: Real-time AI analysis during simulated fights
@@ -711,7 +711,7 @@ fighter = {
 
 ## 18. Competitive Analysis
 
-### 18.1 vs MMArmy (Original)
+### 18.1 vs MMA (Original)
 **Advantages**:
 - Natural language interface (easier to learn)
 - Dynamic content generation (unlimited variety)
